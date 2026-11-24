@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fish Shop Billing</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+ <form class="lbox" onsubmit="doLogin(event)">
+  <div class="lbrand"><img src="logo.png" alt="Samarth Fish"><h1>Samarth Fish Shop Billing</h1></div>
+  <p data-i="login_sub"></p>
+  <label data-i="username"></label><input class="t" id="lu" autocomplete="username" autofocus>
+  <label data-i="password"></label><input class="t" id="lp" type="password" autocomplete="current-password">
+  <div class="err" id="lerr"></div>
+  <button class="btn full" data-i="login"></button>
+  <div class="foot" style="margin-top:6px">🐟 Fresh Fish - Best Quality</div>
+ </form>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+ <nav>
+  <h2 id="navShop">🐟</h2>
+  <button data-p="billing" class="on">🧾 <span data-i="nav_billing"></span></button>
+  <button data-p="dashboard">📊 <span data-i="nav_dashboard"></span></button>
+  <button data-p="fish">🐠 <span data-i="nav_fish"></span></button>
+  <button data-p="analysis">📈 <span data-i="nav_analysis"></span></button>
+  <button data-p="settings">⚙️ <span data-i="nav_settings"></span></button>
+  <button onclick="logout()">🚪 <span data-i="logout"></span></button>
+ </nav>
+ <main>
+  <div class="topbar"><span>🌐 <span data-i="language"></span>:</span><div class="lang"><button type="button" data-lang="en">English</button><button type="button" data-lang="mr">मराठी</button></div></div>
+  <section id="p-billing">
+   <h3 class="pt" data-i="new_bill"></h3>
+   <div class="mini"><span><span data-i="total"></span>: <span id="miniTotal">₹0.00</span></span><button class="btn green" onclick="printBill()">🖨 <span data-i="print_bill"></span></button></div>
+   <div class="bgrid">
+    <div class="card"><div class="fish" id="fishBtns"></div></div>
+    <div class="card bill">
+     <b data-i="current_bill"></b>
+     <div id="billRows" style="margin-top:8px"></div>
+     <div class="total"><span data-i="total"></span><span id="billTotal">₹0.00</span></div>
+     <button class="btn green full" style="margin-top:0" onclick="printBill()">🖨 <span data-i="print_bill"></span></button>
+     <button class="btn sec full" onclick="clearBill()" data-i="clear"></button>
+    </div>
+   </div>
+  </section>
+
+  <section id="p-dashboard" class="hidden">
+   <h3 class="pt" data-i="nav_dashboard"></h3>
+   <div class="stats" id="dstats"></div>
+   <div class="card"><b data-i="last7"></b><div class="bars" id="dbars"></div></div>
+   <div class="card"><b data-i="recent"></b><div id="drecent"></div></div>
+  </section>
+
+  <section id="p-fish" class="hidden">
+   <h3 class="pt" data-i="nav_fish"></h3>
+   <div class="card">
+    <div class="frow">
+     <div><label data-i="fish_name"></label><input class="t" id="fn"></div>
+     <div><label data-i="rate_kg_label"></label><input class="t" id="fr" type="number" min="0" step="0.01"></div>
+     <button class="btn" onclick="addFish()" data-i="add_fish"></button>
+    </div>
+   </div>
+   <div class="card"><div id="fishTable"></div></div>
+  </section>
+
+  <section id="p-analysis" class="hidden">
+   <h3 class="pt" data-i="nav_analysis"></h3>
+   <div class="card"><div class="frow">
+    <div><label data-i="from"></label><input class="t" id="af" type="date"></div>
+    <div><label data-i="to"></label><input class="t" id="at" type="date"></div>
+    <button class="btn" onclick="renderAnalysis()" data-i="show"></button>
+    <button class="btn green" onclick="downloadCSV()">⬇ <span data-i="dl_csv"></span></button>
+   </div></div>
+   <div class="stats" id="astats"></div>
+   <div class="card"><b data-i="fish_wise"></b><div id="afish"></div></div>
+   <div class="card"><b data-i="day_wise"></b><div id="aday"></div></div>
+   <div class="card"><b data-i="all_bills"></b><div id="abills"></div></div>
+  </section>
+
+  <section id="p-settings" class="hidden">
+   <h3 class="pt" data-i="nav_settings"></h3>
+   <div class="card" style="max-width:460px">
+    <b data-i="shop_details"></b>
+    <label data-i="shop_name"></label><input class="t" id="sname">
+    <label data-i="shop_addr"></label><input class="t" id="saddr">
+    <label data-i="owner_name"></label><input class="t" id="sowner">
+    <label data-i="owner_mo"></label><input class="t" id="sownmo" inputmode="tel">
+    <button class="btn" style="margin-top:12px" onclick="saveShop()" data-i="save"></button>
+   </div>
+   <div class="card" style="max-width:460px">
+    <b data-i="change_login"></b>
+    <label data-i="new_user"></label><input class="t" id="nu">
+    <label data-i="new_pass"></label><input class="t" id="np" type="password">
+    <button class="btn" style="margin-top:12px" onclick="saveLogin()" data-i="update"></button>
+   </div>
+   <div class="card" style="max-width:460px">
+    <b>💾 <span data-i="backup_title"></span></b>
+    <p style="color:var(--mute);font-size:14px;margin:8px 0 12px" data-i="backup_note"></p>
+    <button class="btn green" onclick="downloadBackup()">⬇ <span data-i="backup_dl"></span></button>
+    <label style="margin-top:16px" data-i="restore"></label>
+    <input class="t" type="file" accept=".json,application/json" onchange="restoreBackup(this)">
+   </div>
+   <div class="card" style="max-width:460px;border-color:#fca5a5">
+    <b>⚠ <span data-i="clear_title"></span></b>
+    <p style="color:var(--mute);font-size:14px;margin:8px 0 12px" data-i="clear_note"></p>
+    <button class="btn red" onclick="openClr()" data-i="clear_btn"></button>
+   </div>
+  </section>
+  <div class="foot">🐟 Fresh Fish - Best Quality &nbsp;|&nbsp; Ganesh Gajare &nbsp;|&nbsp; Mo: 9096250535</div>
+ </main>
+</div>
+
+<!-- WEIGHT / RATE KEYPAD -->
+<div class="modal hidden" id="kp">
+ <div class="mbox">
+  <h4 id="kpName">Fish</h4>
+  <div class="disp">
+   <div id="dW" class="on" onclick="setField('w')"><small data-i="weight_kg"></small><b id="vW">0</b></div>
+   <div id="dR" onclick="setField('r')"><small data-i="rate_kg"></small><b id="vR">0</b></div>
+  </div>
+  <div class="amt"><small data-i="amount"></small><span id="vA">₹0.00</span></div>
+  <div class="pad" id="pad"></div>
+  <div class="mact">
+   <button class="btn sec" onclick="closeKp()" data-i="cancel"></button>
+   <button class="btn green" onclick="addItem()" data-i="add_to_bill"></button>
+  </div>
+ </div>
+</div>
+
+<!-- CLEAR DATA (password) -->
+<div class="modal hidden" id="clrM">
+ <div class="mbox">
+  <h4>⚠ <span data-i="clear_title"></span></h4>
+  <p style="color:var(--mute);font-size:14px;margin:0 0 10px" data-i="clear_enter"></p>
+  <input class="t" type="password" id="clrPw" autocomplete="off" onkeydown="if(event.key==='Enter')doClear()">
+  <div class="err" id="clrErr"></div>
+  <div class="mact">
+   <button class="btn sec" onclick="closeClr()" data-i="cancel"></button>
+   <button class="btn red" onclick="doClear()" data-i="delete_now"></button>
+  </div>
+ </div>
+</div>
+
+<!-- PRINT RECEIPT -->
+<div id="receipt"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
