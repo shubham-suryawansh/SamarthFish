@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fish Shop Billing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Samarth Fish – Bhigwan Billing</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -24,7 +24,13 @@
 <!-- APP -->
 <div id="app" class="hidden">
  <nav>
-  <h2 id="navShop">🐟</h2>
+  <div class="sidebar-brand" id="navShop">
+   <img src="logo.png" alt="Samarth Fish – Bhigwan, Fresh Fish Best Quality">
+   <div class="sidebar-brand-text" aria-hidden="true">
+    <strong>Samarth Fish</strong>
+    <small>Bhigwan</small>
+   </div>
+  </div>
   <button data-p="billing" class="on">🧾 <span data-i="nav_billing"></span></button>
   <button data-p="dashboard">📊 <span data-i="nav_dashboard"></span></button>
   <button data-p="fish">🐠 <span data-i="nav_fish"></span></button>
@@ -50,6 +56,14 @@
   </section>
 
   <section id="p-dashboard" class="hidden">
+   <div class="dashboard-brand">
+    <img src="logo.png" alt="Samarth Fish Bhigwan - Fresh Fish Best Quality">
+    <div class="dashboard-brand-copy">
+     <strong>Samarth Fish</strong>
+     <span>Bhigwan</span>
+     <small>Fresh Fish Best Quality</small>
+    </div>
+   </div>
    <h3 class="pt" data-i="nav_dashboard"></h3>
    <div class="stats" id="dstats"></div>
    <div class="card"><b data-i="last7"></b><div class="bars" id="dbars"></div></div>
@@ -59,10 +73,9 @@
   <section id="p-fish" class="hidden">
    <h3 class="pt" data-i="nav_fish"></h3>
    <div class="card">
-    <div class="frow">
-     <div><label data-i="fish_name"></label><input class="t" id="fn"></div>
-     <div><label data-i="rate_kg_label"></label><input class="t" id="fr" type="number" min="0" step="0.01"></div>
-     <button class="btn" onclick="addFish()" data-i="add_fish"></button>
+    <div class="frow fish-name-only">
+     <div><label data-i="fish_name"></label><input class="t" id="fn" placeholder="Enter fish name" autocomplete="off"></div>
+     <button class="btn" type="button" onclick="addFish()" data-i="add_fish"></button>
     </div>
    </div>
    <div class="card"><div id="fishTable"></div></div>
@@ -111,7 +124,7 @@
     <button class="btn red" onclick="openClr()" data-i="clear_btn"></button>
    </div>
   </section>
-  <div class="foot">🐟 Fresh Fish - Best Quality &nbsp;|&nbsp; Ganesh Gajare &nbsp;|&nbsp; Mo: 9096250535</div>
+  <div class="foot">🐟 Samarth Fish, Bhigwan &nbsp;|&nbsp; Fresh Fish Best Quality</div>
  </main>
 </div>
 

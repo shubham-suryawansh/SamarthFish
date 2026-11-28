@@ -40,7 +40,7 @@ const t=k=>(L[lang][k]!==undefined?L[lang][k]:L.en[k]);
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){alert(t('save_fail'))}};
 
 const names=['Bhati','Rahu','Katla','Shingta','Kardu','Chilapi','Shingi','Echari','Suraki','Shengal','Padin','Vam','Zinga','Gugali','Kanas'];
-let fishes=load(K.fish,null)||names.map((n,i)=>({id:i+1,name:n,rate:0}));
+let fishes=(load(K.fish,null)||names.map((n,i)=>({id:i+1,name:n}))).map(f=>({id:f.id,name:f.name}));
 let sales=load(K.sales,[]);
 let settings=load(K.set,{name:'Ganesh Gajare',addr:'Mo: 9096250535'});
 if(settings.name==='My Fish Shop'&&!settings.addr){settings={name:'Ganesh Gajare',addr:'Mo: 9096250535'};save(K.set,settings)}
@@ -60,7 +60,7 @@ function applyLang(){
  document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
  document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
  buildPad();
- if(!$('app').classList.contains('hidden')){$('navShop').textContent='🐟 '+settings.name;show(curPage)}
+ if(!$('app').classList.contains('hidden')){$('navShop').querySelector('.sidebar-brand-text strong').textContent=settings.name||'Samarth Fish';show(curPage)}
 }
 function setLang(l){lang=l;save(K.lang,l);applyLang()}
 document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
@@ -72,7 +72,7 @@ function doLogin(e){e.preventDefault();
   enter();
  }else $('lerr').textContent=t('wrong');
 }
-function enter(){$('login').classList.add('hidden');$('app').classList.remove('hidden');$('navShop').textContent='🐟 '+settings.name;show('billing')}
+function enter(){$('login').classList.add('hidden');$('app').classList.remove('hidden');$('navShop').querySelector('.sidebar-brand-text strong').textContent=settings.name||'Samarth Fish';show('billing')}
 function logout(){try{sessionStorage.removeItem('fsb_in')}catch(x){}location.reload()}
 
 // ---------- navigation ----------
@@ -90,7 +90,7 @@ function show(p){
 
 // ---------- billing ----------
 function renderFishBtns(){
- $('fishBtns').innerHTML=fishes.map(f=>`<button onclick="openKp(${f.id})"><span class="ic">🐟</span>${esc(f.name)}<small>${f.rate?money(f.rate)+t('per_kg'):t('set_rate')}</small></button>`).join('');
+ $('fishBtns').innerHTML=fishes.map(f=>`<button type="button" onclick="openKp(${f.id})"><span class="ic">🐟</span>${esc(f.name)}<small>Tap to enter weight & rate</small></button>`).join('');
  renderBill();
 }
 let cur=null,field='w',vals={w:'',r:''};
@@ -98,8 +98,8 @@ function buildPad(){
  const pad=['7','8','9','4','5','6','1','2','3','.','0','⌫'];
  $('pad').innerHTML=pad.map(k=>`<button onclick="key('${k}')">${k}</button>`).join('')+`<button class="w" onclick="key('C')">${t('clear')}</button>`;
 }
-function openKp(id){cur=fishes.find(f=>f.id===id);vals={w:'',r:cur.rate?String(cur.rate):''};$('kpName').textContent=cur.name;setField('w');$('kp').classList.remove('hidden')}
-function closeKp(){$('kp').classList.add('hidden')}
+function openKp(id){cur=fishes.find(f=>String(f.id)===String(id));if(!cur)return;vals={w:'',r:''};$('kpName').textContent=cur.name;setField('w');upd();$('kp').classList.remove('hidden')}
+function closeKp(){$('kp').classList.add('hidden');cur=null;vals={w:'',r:''};field='w';upd()}
 function setField(f){field=f;$('dW').classList.toggle('on',f==='w');$('dR').classList.toggle('on',f==='r');upd()}
 function key(k){
  let v=vals[field];
@@ -127,7 +127,6 @@ function addItem(){
  if(!(kg>0)){alert(t('enter_weight'));setField('w');return}
  if(!(rate>0)){alert(t('enter_rate'));setField('r');return}
  bill.push({name:cur.name,kg:kg,rate:rate,amt:Math.round(kg*rate*100)/100});
- if(cur.rate!==rate){cur.rate=rate;save(K.fish,fishes)}
  closeKp();renderFishBtns();
 }
 const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
@@ -180,14 +179,16 @@ function billTable(a){
 
 // ---------- fish management ----------
 function renderFishTable(){
- $('fishTable').innerHTML=`<table><tr><th>${t('fish_col')}</th><th>${t('rate_col')}</th><th></th></tr>${fishes.map(f=>`<tr><td><input class="t" value="${esc(f.name)}" onchange="editFish(${f.id},'name',this.value)"></td><td><input class="t" type="number" min="0" step="0.01" value="${f.rate}" onchange="editFish(${f.id},'rate',this.value)"></td><td><button class="btn red" onclick="delFish(${f.id})">${t('del')}</button></td></tr>`).join('')}</table>`;
+ $('fishTable').innerHTML=`<table><tr><th>${t('fish_col')}</th><th></th></tr>${fishes.map(f=>`<tr><td><input class="t" value="${esc(f.name)}" onchange="editFish(${f.id},this.value)"></td><td><button class="btn red" onclick="delFish(${f.id})">${t('del')}</button></td></tr>`).join('')}</table>`;
 }
 function addFish(){
- const n=$('fn').value.trim();if(!n){alert(t('enter_fish'));return}
- fishes.push({id:Date.now(),name:n,rate:+$('fr').value||0});save(K.fish,fishes);
- $('fn').value='';$('fr').value='';renderFishTable();
+ const n=$('fn').value.trim();if(!n){alert(t('enter_fish'));$('fn').focus();return}
+ if(fishes.some(f=>f.name.toLowerCase()===n.toLowerCase())){alert('This fish already exists.');return}
+ fishes.push({id:Date.now(),name:n});save(K.fish,fishes);
+ $('fn').value='';renderFishTable();renderFishBtns();$('fn').focus();
 }
-function editFish(id,k,v){const f=fishes.find(x=>x.id===id);if(!f)return;if(k==='name'){v=v.trim();if(!v)return renderFishTable()}else v=+v||0;f[k]=v;save(K.fish,fishes)}
+function editFish(id,v){const f=fishes.find(x=>String(x.id)===String(id));if(!f)return;v=v.trim();if(!v)return renderFishTable();f.name=v;save(K.fish,fishes);renderFishBtns();}
+
 function delFish(id){if(confirm(t('del_q'))){fishes=fishes.filter(f=>f.id!==id);save(K.fish,fishes);renderFishTable()}}
 
 // ---------- analysis ----------
@@ -208,7 +209,7 @@ function renderAnalysis(){
 }
 
 // ---------- settings ----------
-function saveShop(){settings={name:$('sname').value.trim()||'Ganesh Gajare',addr:$('saddr').value.trim(),owner:$('sowner').value.trim(),ownerMo:$('sownmo').value.trim()};save(K.set,settings);$('navShop').textContent='🐟 '+settings.name;alert(t('saved'))}
+function saveShop(){settings={name:$('sname').value.trim()||'Ganesh Gajare',addr:$('saddr').value.trim(),owner:$('sowner').value.trim(),ownerMo:$('sownmo').value.trim()};save(K.set,settings);$('navShop').querySelector('.sidebar-brand-text strong').textContent=settings.name||'Samarth Fish';alert(t('saved'))}
 function saveLogin(){
  const u=$('nu').value.trim(),p=$('np').value;
  if(!u||p.length<4){alert(t('login_err'));return}
